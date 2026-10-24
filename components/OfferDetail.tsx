@@ -123,7 +123,7 @@ export function OfferDetail({ offer, party, demo, loggedIn, onClose }: Props) {
             <div className="d-sec">Condiciones</div>
             <p className="cond">
               Beneficio válido para esta reserva, hasta {plural(offer.maxParty, "persona", "personas")}. No acumulable con otras
-              promociones. Tolerancia de 15 minutos. Podés cancelar sin costo hasta 1 hora antes.
+              promociones. Tolerancia de 15 minutos. Si no podés ir, cancelá desde Reservas para liberar la mesa.
             </p>
           </>
         ) : (

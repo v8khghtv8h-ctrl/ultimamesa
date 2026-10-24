@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PanelCartas } from "@/components/panel/PanelCartas";
-import { demoPanelOffers, demoRestaurant, getRestaurantOffers, type PanelRestaurant } from "@/lib/panel";
+import { PanelServicio } from "@/components/panel/PanelServicio";
+import { PanelTabs } from "@/components/panel/PanelTabs";
+import {
+  demoPanelOffers, demoPanelReservations, demoRestaurant, getRestaurantOffers, getTodayReservations,
+  type PanelOffer, type PanelReservation, type PanelRestaurant,
+} from "@/lib/panel";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +18,7 @@ type StaffRow = {
 
 export default async function PanelPage() {
   const supabase = await getServerSupabase();
-  if (!supabase) return <Panel restaurant={demoRestaurant} offers={demoPanelOffers} demo />;
+  if (!supabase) return <Panel restaurant={demoRestaurant} offers={demoPanelOffers} reservations={demoPanelReservations} demo />;
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/panel");
@@ -36,11 +41,16 @@ export default async function PanelPage() {
 
   const r = staff[0].restaurants;
   const restaurant: PanelRestaurant = { id: r.id, name: r.name, neighborhood: r.neighborhood, cuisine: r.cuisine, feeCents: r.fee_cents };
-  const offers = await getRestaurantOffers({ ...restaurant, priceLevel: r.price_level });
-  return <Panel restaurant={restaurant} offers={offers} demo={false} />;
+  const [offers, reservations] = await Promise.all([
+    getRestaurantOffers({ ...restaurant, priceLevel: r.price_level }),
+    getTodayReservations(restaurant.id),
+  ]);
+  return <Panel restaurant={restaurant} offers={offers} reservations={reservations} demo={false} />;
 }
 
-function Panel({ restaurant, offers, demo }: { restaurant: PanelRestaurant; offers: Awaited<ReturnType<typeof getRestaurantOffers>>; demo: boolean }) {
+type PanelProps = { restaurant: PanelRestaurant; offers: PanelOffer[]; reservations: PanelReservation[]; demo: boolean };
+
+function Panel({ restaurant, offers, reservations, demo }: PanelProps) {
   return (
     <main className="page panel-page">
       <div className="p-top">
@@ -50,7 +60,11 @@ function Panel({ restaurant, offers, demo }: { restaurant: PanelRestaurant; offe
       <h1 className="display">{restaurant.name}</h1>
       <p style={{ margin: 0 }}>{restaurant.cuisine} · {restaurant.neighborhood}</p>
       {demo && <p className="banner" style={{ margin: "12px 0 0" }}>Modo de ejemplo: podés probar todo, pero los cambios no se guardan.</p>}
-      <PanelCartas restaurant={restaurant} offers={offers} demo={demo} />
+      <PanelTabs
+        waiting={reservations.filter((r) => r.status === "confirmed").length}
+        servicio={<PanelServicio restaurant={restaurant} reservations={reservations} demo={demo} />}
+        cartas={<PanelCartas restaurant={restaurant} offers={offers} demo={demo} />}
+      />
     </main>
   );
 }
