@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Deck } from "@/components/Deck";
+import { TabBar } from "@/components/TabBar";
 import { getTonightOffers } from "@/lib/offers";
 import { getServerSupabase } from "@/lib/supabase/server";
 
@@ -24,7 +25,8 @@ export default async function Home() {
         </div>
       </header>
       {demo && <p className="banner">Datos de ejemplo: todavía no hay una base de datos conectada.</p>}
-      <Deck offers={offers} />
+      <Deck offers={offers} demo={demo} loggedIn={Boolean(user)} />
+      <TabBar current="/" />
     </main>
   );
 }
