@@ -1,56 +1,52 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PanelCartas } from "@/components/panel/PanelCartas";
+import { PanelMes } from "@/components/panel/PanelMes";
 import { PanelServicio } from "@/components/panel/PanelServicio";
 import { PanelTabs } from "@/components/panel/PanelTabs";
+import { getMonthRows, parseMonth, type MonthRow } from "@/lib/month";
 import {
-  demoPanelOffers, demoPanelReservations, demoRestaurant, getRestaurantOffers, getTodayReservations,
+  demoPanelOffers, demoPanelReservations, getMyRestaurant, getRestaurantOffers, getTodayReservations,
   type PanelOffer, type PanelReservation, type PanelRestaurant,
 } from "@/lib/panel";
-import { getServerSupabase } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-type StaffRow = {
-  role: "owner" | "staff";
-  restaurants: { id: string; name: string; neighborhood: string; cuisine: string; price_level: number; fee_cents: number };
-};
+export default async function PanelPage({ searchParams }: { searchParams: Promise<{ mes?: string | string[] }> }) {
+  const params = await searchParams;
+  const month = parseMonth(params.mes);
+  const me = await getMyRestaurant();
+  if (me.kind === "login") redirect("/login?next=/panel");
 
-export default async function PanelPage() {
-  const supabase = await getServerSupabase();
-  if (!supabase) return <Panel restaurant={demoRestaurant} offers={demoPanelOffers} reservations={demoPanelReservations} demo />;
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/panel");
-
-  const { data: staff } = await supabase
-    .from("restaurant_staff")
-    .select("role, restaurants (id, name, neighborhood, cuisine, price_level, fee_cents)")
-    .eq("user_id", user.id)
-    .returns<StaffRow[]>();
-
-  if (!staff?.length) {
+  if (me.kind === "none") {
     return (
       <main className="page">
         <Link href="/" className="logo display" style={{ textDecoration: "none" }}>última<br />mesa.</Link>
         <h1 className="display">Panel para restaurantes</h1>
-        <p>Tu cuenta ({user.email}) todavía no está asociada a un restaurante. Pedile al equipo de Última Mesa que te dé acceso.</p>
+        <p>Tu cuenta ({me.email}) todavía no está asociada a un restaurante. Pedile al equipo de Última Mesa que te dé acceso.</p>
       </main>
     );
   }
 
-  const r = staff[0].restaurants;
-  const restaurant: PanelRestaurant = { id: r.id, name: r.name, neighborhood: r.neighborhood, cuisine: r.cuisine, feeCents: r.fee_cents };
-  const [offers, reservations] = await Promise.all([
-    getRestaurantOffers({ ...restaurant, priceLevel: r.price_level }),
-    getTodayReservations(restaurant.id),
+  const demo = me.kind === "demo";
+  const [offers, reservations, monthRows] = await Promise.all([
+    demo ? demoPanelOffers : getRestaurantOffers({ ...me.restaurant, priceLevel: me.priceLevel }),
+    demo ? demoPanelReservations : getTodayReservations(me.restaurant.id),
+    getMonthRows(me.restaurant.id, month),
   ]);
-  return <Panel restaurant={restaurant} offers={offers} reservations={reservations} demo={false} />;
+  return (
+    <Panel restaurant={me.restaurant} offers={offers} reservations={reservations} month={month} monthRows={monthRows}
+      openMonth={params.mes !== undefined} demo={demo} />
+  );
 }
 
-type PanelProps = { restaurant: PanelRestaurant; offers: PanelOffer[]; reservations: PanelReservation[]; demo: boolean };
+type PanelProps = {
+  restaurant: PanelRestaurant; offers: PanelOffer[]; reservations: PanelReservation[];
+  month: string; monthRows: MonthRow[]; openMonth: boolean; demo: boolean;
+};
 
-function Panel({ restaurant, offers, reservations, demo }: PanelProps) {
+function Panel({ restaurant, offers, reservations, month, monthRows, openMonth, demo }: PanelProps) {
+  const waiting = reservations.filter((r) => r.status === "confirmed").length;
   return (
     <main className="page panel-page">
       <div className="p-top">
@@ -61,9 +57,11 @@ function Panel({ restaurant, offers, reservations, demo }: PanelProps) {
       <p style={{ margin: 0 }}>{restaurant.cuisine} · {restaurant.neighborhood}</p>
       {demo && <p className="banner" style={{ margin: "12px 0 0" }}>Modo de ejemplo: podés probar todo, pero los cambios no se guardan.</p>}
       <PanelTabs
-        waiting={reservations.filter((r) => r.status === "confirmed").length}
+        waiting={waiting}
+        initial={openMonth ? "mes" : waiting > 0 ? "servicio" : "cartas"}
         servicio={<PanelServicio restaurant={restaurant} reservations={reservations} demo={demo} />}
         cartas={<PanelCartas restaurant={restaurant} offers={offers} demo={demo} />}
+        mes={<PanelMes restaurant={restaurant} month={month} rows={monthRows} demo={demo} />}
       />
     </main>
   );

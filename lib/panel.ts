@@ -84,3 +84,32 @@ export const demoPanelReservations: PanelReservation[] = sortByTime([
   { id: "rv3", code: "UM-3HXR8", status: "confirmed", startsAt: "22:00", party: 4, guestName: "Martín Gómez", note: null, feeCents: null },
   { id: "rv4", code: "UM-B4N6W", status: "confirmed", startsAt: "22:00", party: 3, guestName: "Diego Ruiz", note: "Una persona celíaca", feeCents: null },
 ]);
+
+// El restaurante de la persona que ingresó (por ahora, el primero al que tiene acceso).
+type StaffRow = {
+  restaurants: { id: string; name: string; neighborhood: string; cuisine: string; price_level: number; fee_cents: number };
+};
+
+export type MyRestaurant =
+  | { kind: "demo"; restaurant: PanelRestaurant; priceLevel: number }
+  | { kind: "login" }
+  | { kind: "none"; email: string }
+  | { kind: "ok"; restaurant: PanelRestaurant; priceLevel: number };
+
+export async function getMyRestaurant(): Promise<MyRestaurant> {
+  const supabase = await getServerSupabase();
+  if (!supabase) return { kind: "demo", restaurant: demoRestaurant, priceLevel: 3 };
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { kind: "login" };
+  const { data: staff } = await supabase
+    .from("restaurant_staff")
+    .select("restaurants (id, name, neighborhood, cuisine, price_level, fee_cents)")
+    .eq("user_id", user.id)
+    .returns<StaffRow[]>();
+  const r = staff?.[0]?.restaurants;
+  if (!r) return { kind: "none", email: user.email ?? "" };
+  return {
+    kind: "ok", priceLevel: r.price_level,
+    restaurant: { id: r.id, name: r.name, neighborhood: r.neighborhood, cuisine: r.cuisine, feeCents: r.fee_cents },
+  };
+}
