@@ -242,3 +242,25 @@ a { color: inherit; }
   .mo-table th:last-child, .mo-table td:last-child { padding-right: 12px; }
   .mo-table thead th { font-size: 9.5px; letter-spacing: 0.04em; }
 }
+
+/* Equipo: navegación y alta de restaurantes */
+.p-tabs a { padding: 10px 14px; font-weight: 700; font-size: 14px; color: var(--ink-2); border-bottom: 3px solid transparent; margin-bottom: -1.5px; text-decoration: none; }
+.p-tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
+.ad-form { background: var(--card); border-radius: 24px; padding: 18px 20px; margin-top: 16px; }
+.ad-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+.ad-grid .field { margin: 10px 0 0; }
+.ad-grid .wide { grid-column: 1 / -1; }
+.field select, .field textarea { border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 12px; font: inherit; font-weight: 500; }
+.field textarea { resize: vertical; min-height: 70px; }
+.field small { font-weight: 500; color: var(--ink-2); }
+.ad-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.ad-r { background: var(--card); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.ad-r.off { opacity: 0.6; }
+.ad-r h3 { margin: 0; font-size: 20px; line-height: 1.05; }
+.ad-r p { margin: 0; font-size: 12.5px; }
+.ad-inv { display: flex; gap: 6px; }
+.ad-inv input { flex: 1; min-width: 0; border: 1.5px solid var(--line); background: #fff; border-radius: 999px; padding: 0 14px; height: 38px; }
+.ad-inv input:focus { border-color: var(--ink); outline: none; }
+.ad-pill { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 2px 9px; background: var(--paper-2); color: var(--ink-2); }
+.ad-pill.ok { background: #dff1e6; color: var(--ok); }
+@media (max-width: 560px) { .ad-grid { grid-template-columns: minmax(0, 1fr); } }

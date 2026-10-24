@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AdminNav } from "@/components/admin/AdminNav";
 import { getAdminAccess, getSettlement, monthLabel, parseMonth, recentMonths, usd } from "@/lib/month";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +34,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       <h1 className="display">Liquidación de {monthLabel(month)}</h1>
       <p style={{ margin: 0 }}>Comisión por comensal que llegó, por restaurante. Las reservas cuentan por fecha de servicio.</p>
       {access === "demo" && <p className="banner" style={{ margin: "12px 0 0" }}>Modo de ejemplo: restaurantes y números inventados.</p>}
+      <AdminNav current="liquidacion" />
 
       <nav className="quick mo-months" aria-label="Elegir mes">
         {recentMonths(6).map((m) => (
