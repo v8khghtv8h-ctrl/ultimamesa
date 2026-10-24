@@ -30,6 +30,7 @@ export async function getTonightOffers(): Promise<{ offers: Offer[]; demo: boole
       restaurants!inner (id, name, neighborhood, cuisine, price_level, rating, rating_count, description, highlights),
       offer_slots (id, starts_at, tables_left)`)
     .eq("active", true)
+    .eq("restaurants.active", true)
     .eq("service_date", today)
     .order("created_at", { ascending: false })
     .returns<Row[]>();
