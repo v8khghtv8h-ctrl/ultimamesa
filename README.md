@@ -56,7 +56,7 @@ Las reservas se crean y cambian solo con funciones de Postgres, no escribiendo l
 
 1. Base: proyecto, base de datos, ingreso, diseño de cartas.
 2. **Lado restaurante** (lista): publicar, pausar y editar cartas en `/panel`. Sin Supabase, el panel funciona en modo de ejemplo.
-3. Lado usuario: reserva con QR, guardadas y cancelación.
+3. **Lado usuario** (lista): reserva con QR, guardadas (`/guardadas`) y reservas con cancelación (`/reservas`). En modo de ejemplo quedan en el navegador.
 4. Noche de servicio: escaneo del QR y registro de la comisión.
 5. Cierre de mes: resumen y liquidación en CSV.
 6. Piloto: dominio, emails y primeros restaurantes.
