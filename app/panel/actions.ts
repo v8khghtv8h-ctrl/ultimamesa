@@ -103,3 +103,30 @@ export async function retireOffer(offerId: string): Promise<Result & { paused?: 
   revalidatePath("/");
   return { ok: true };
 }
+
+// Noche de servicio ------------------------------------------------------
+
+type ReservationResult =
+  | { ok: true; id: string; code: string; status: "arrived" | "no_show"; feeCents: number | null }
+  | { ok: false; error: string };
+
+// Los códigos llegan escritos a mano o leídos del QR ("ULTIMAMESA:UM-XXXXX").
+export async function registerArrival(rawCode: string): Promise<ReservationResult> {
+  const c = await client();
+  if (!c.supabase) return { ok: false, error: c.error };
+  const code = rawCode.toUpperCase().match(/UM-[A-Z0-9]{5}/)?.[0];
+  if (!code) return { ok: false, error: "Ese código no parece de Última Mesa. Tiene la forma UM-XXXXX." };
+  const { data, error } = await c.supabase.rpc("register_arrival", { p_code: code }).single<{ id: string; code: string; fee_cents: number | null }>();
+  if (error || !data) return { ok: false, error: error?.message ?? "No pudimos registrar la llegada." };
+  revalidatePath("/panel");
+  return { ok: true, id: data.id, code: data.code, status: "arrived", feeCents: data.fee_cents };
+}
+
+export async function markNoShow(reservationId: string): Promise<ReservationResult> {
+  const c = await client();
+  if (!c.supabase) return { ok: false, error: c.error };
+  const { data, error } = await c.supabase.rpc("mark_no_show", { p_reservation: reservationId }).single<{ id: string; code: string }>();
+  if (error || !data) return { ok: false, error: error?.message ?? "No pudimos marcar la reserva." };
+  revalidatePath("/panel");
+  return { ok: true, id: data.id, code: data.code, status: "no_show", feeCents: null };
+}
