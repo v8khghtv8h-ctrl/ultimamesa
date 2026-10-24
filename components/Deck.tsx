@@ -1,12 +1,13 @@
 "use client";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { OfferCard } from "./OfferCard";
 import { OfferDetail } from "./OfferDetail";
 import type { Offer } from "@/lib/types";
+import { savedStore } from "@/lib/local";
 
 type Decision = { id: string; dir: 1 | -1 };
 
-export function Deck({ offers }: { offers: Offer[] }) {
+export function Deck({ offers, demo, loggedIn }: { offers: Offer[]; demo: boolean; loggedIn: boolean }) {
   const [party, setParty] = useState(2);
   const [cuisines, setCuisines] = useState<Set<string>>(new Set());
   const [history, setHistory] = useState<Decision[]>([]);
@@ -21,11 +22,21 @@ export function Deck({ offers }: { offers: Offer[] }) {
   );
   const top = visible[0];
 
+  // Las cartas guardadas se recuerdan en este navegador para la pestaña Guardadas.
+  useEffect(() => {
+    const ids = savedStore.get();
+    if (ids.length) setHistory(ids.filter((id) => offers.some((o) => o.id === id)).map((id) => ({ id, dir: 1 as const })));
+  }, [offers]);
+  function remember(next: Decision[]) {
+    savedStore.set(next.filter((h) => h.dir === 1).map((h) => h.id));
+    return next;
+  }
+
   function decide(dir: 1 | -1) {
     if (!top || leaving) return;
     setLeaving({ id: top.id, dir });
     setTimeout(() => {
-      setHistory((h) => [...h, { id: top.id, dir }]);
+      setHistory((h) => remember([...h, { id: top.id, dir }]));
       setLeaving(null);
     }, 240);
   }
@@ -57,20 +68,20 @@ export function Deck({ offers }: { offers: Offer[] }) {
           <div className="end">
             <h2 className="display">Viste todas las mesas de esta noche</h2>
             <p>{saved ? `Guardaste ${saved}. ` : ""}Se liberan mesas a cada rato.</p>
-            {history.length > 0 && <button className="outline" onClick={() => setHistory([])}>Ver de nuevo</button>}
+            {history.some((h) => h.dir === -1) && <button className="outline" onClick={() => setHistory((h) => h.filter((x) => x.dir === 1))}>Ver las que pasé</button>}
           </div>
         )}
       </div>
 
       <div className="actions">
         <button className="round" style={{ width: 40, height: 40, fontSize: 15 }} aria-label="Deshacer"
-          disabled={!history.length} onClick={() => setHistory((h) => h.slice(0, -1))}>↺</button>
+          disabled={!history.length} onClick={() => setHistory((h) => remember(h.slice(0, -1)))}>↺</button>
         <button className="round" aria-label="Pasar" disabled={!top} onClick={() => decide(-1)}>✕</button>
         <button className="book" disabled={!top} onClick={() => top && setOpen(top)}>Reservar</button>
         <button className="round" aria-label="Guardar" disabled={!top} onClick={() => decide(1)}>♥</button>
       </div>
 
-      {open && <OfferDetail offer={open} party={party} onClose={() => setOpen(null)} />}
+      {open && <OfferDetail offer={open} party={party} demo={demo} loggedIn={loggedIn} onClose={() => setOpen(null)} />}
     </>
   );
 }
