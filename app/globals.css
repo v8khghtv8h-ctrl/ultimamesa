@@ -99,3 +99,49 @@ a { color: inherit; }
 .list li:first-child { border-top: 0; padding-top: 0; }
 
 @media (prefers-reduced-motion: reduce) { .c { transition: none; } }
+
+/* Panel del restaurante */
+.panel-page { max-width: 1040px; }
+.p-top { display: flex; justify-content: space-between; align-items: end; gap: 10px; }
+.p-tag { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 800; background: var(--ink); color: var(--yolk); border-radius: 999px; padding: 4px 10px; }
+.p-h2 { font-size: 26px; margin: 28px 0 12px; line-height: 1; }
+.p-k { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 800; margin: 18px 0 8px; }
+.p-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.p-stats div { background: var(--card); border-radius: 18px; padding: 12px 14px; }
+.p-stats b { display: block; font-size: clamp(22px, 6vw, 34px); line-height: 1; white-space: nowrap; }
+.p-stats span { font-size: 12px; color: var(--ink-2); }
+.p-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+.p-offer { display: flex; flex-direction: column; gap: 10px; }
+.p-offer.paused .p-card { filter: grayscale(1); opacity: 0.55; }
+.p-card { position: relative; aspect-ratio: 3 / 4; max-width: 100%; }
+.p-card .c { cursor: default; touch-action: auto; }
+.p-controls { background: var(--card); border-radius: 18px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.stepper { display: inline-flex; align-items: center; gap: 8px; }
+.stepper button { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--ink); background: transparent; font-weight: 800; line-height: 1; }
+.stepper button:disabled { opacity: 0.3; cursor: not-allowed; }
+.stepper b { min-width: 22px; text-align: center; }
+.switch { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+.switch input { appearance: none; width: 40px; height: 24px; border-radius: 999px; background: var(--line); position: relative; cursor: pointer; margin: 0; transition: background 0.2s; }
+.switch input::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left 0.2s; }
+.switch input:checked { background: var(--ok); }
+.switch input:checked::after { left: 19px; }
+.outline.danger { border-color: var(--bad); color: var(--bad); }
+.link-btn { border: 0; background: none; padding: 0 0 0 6px; font-weight: 800; }
+.p-form { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; background: var(--card); border-radius: 24px; padding: 18px 20px; margin-top: 16px; }
+.p-preview .p-card { max-width: 320px; }
+.p-tpls { display: flex; flex-wrap: wrap; gap: 8px; }
+.p-tpl { border: 1.5px solid var(--ink); background: transparent; border-radius: 16px; padding: 8px 12px; text-align: left; font-size: 12px; color: var(--ink-2); }
+.p-tpl b { display: block; color: var(--ink); font-size: 13px; }
+.p-range { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.p-range input { flex: 1; accent-color: var(--ink); }
+.p-range output { font-size: 30px; min-width: 84px; text-align: right; }
+.p-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.p-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.p-swatch { width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent; }
+.p-swatch[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 3px var(--card); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 760px) {
+  .p-form { grid-template-columns: minmax(0, 1fr); }
+  .p-preview { order: -1; }
+  .p-preview .p-card { max-width: 240px; }
+}

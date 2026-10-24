@@ -36,7 +36,7 @@ where r.slug = 'demo-brasa-del-bajo' and u.email = 'duenio@ejemplo.com';
 
 | Carpeta | Qué hay |
 | --- | --- |
-| `app/` | Pantallas: mazo de cartas (`/`), ingreso (`/login`), cuenta (`/cuenta`), panel del restaurante (`/panel`) |
+| `app/` | Pantallas: mazo de cartas (`/`), ingreso (`/login`), cuenta (`/cuenta`), panel del restaurante (`/panel`) y sus acciones (`app/panel/actions.ts`) |
 | `components/` | Carta, mazo con gestos para deslizar y detalle de la mesa |
 | `lib/` | Tipos, lectura de cartas desde Supabase y datos de ejemplo |
 | `supabase/` | Esquema, reglas de acceso y funciones de negocio en SQL |
@@ -54,8 +54,8 @@ Las reservas se crean y cambian solo con funciones de Postgres, no escribiendo l
 
 ## Etapas
 
-1. **Base** (esta): proyecto, base de datos, ingreso, diseño de cartas.
-2. Lado restaurante: publicar, pausar y editar cartas.
+1. Base: proyecto, base de datos, ingreso, diseño de cartas.
+2. **Lado restaurante** (lista): publicar, pausar y editar cartas en `/panel`. Sin Supabase, el panel funciona en modo de ejemplo.
 3. Lado usuario: reserva con QR, guardadas y cancelación.
 4. Noche de servicio: escaneo del QR y registro de la comisión.
 5. Cierre de mes: resumen y liquidación en CSV.
